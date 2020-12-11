@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.map{
+  margin-top: 0px;
+  z-index: 1;
+}
+
+.form {
+  float: left;
+  margin-top: 350px;
+  z-index: 0;
+}
+h3 {
+  color: rgb(132, 0, 255);
+}
+.btn {
+  padding: 8px;
+  color: rgb(168, 58, 58)
+}
+/* rgba takes 4 argumnents and the last one is for transparency goes from 0 - 1 where 0 is transparent and 1 is opaque */
+.btn1 {
+  color: rgba(255, 0, 0, 0.7);
+}
+.btn2 {
+  color: green;
+}
+.btn3 {
+  color: blue;
+}
