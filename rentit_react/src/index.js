@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import MainContent from './components/MainContent';
-import PracticeComp from './components/PracticeComp'
+import App from './App'
 
 
 ReactDOM.render (
-  <PracticeComp />,
+  <App />,
   document.getElementById("root"))
