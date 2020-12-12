@@ -19,7 +19,8 @@
 .env.test.local
 .env.production.local
 .eslintcache
-.Google Api key.txt
+
+**.txt
 
 npm-debug.log*
 yarn-debug.log*
