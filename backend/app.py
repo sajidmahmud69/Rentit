@@ -8,7 +8,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 app = Flask (__name__)
 app.secret_key = "THISISSECRET"
 # Configure DB
-app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:123456@localhost/rentit'
+app.config['SQLALCHEMY_DATABASE_URI']='mysql+pymysql://root:123456@localhost/rentit'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
 app.config["JWT_SECRET_KEY"]="nevergonnagiveyouup"
 app.config["JWT_BLACKLIST_ENABLED"] = True
@@ -52,8 +52,8 @@ def addUser(first_name,last_name,username,email,password):
             db.session.commit()
             return True
         except Exception as e:
-                print (e)
-                return False
+            print (e)
+            return False
     else:
         return False
 
@@ -278,6 +278,8 @@ if __name__ == '__main__':
 
 #Register
 # curl -g -X POST -H "Content-Type: application/json" -d "{\"first_name\": \"Sajid\", \"last_name\": \"Mahmud\",\"username\":\"sajidmahmud69\",\"email\":\"sajidmahmud36@yahoo.com\",\"password\":\"mallu\"}" "http://localhost:5000/api/register"
+
+# curl -g -X POST -H "Content-Type: application/json" -d "{\"first_name\": \"Noor\", \"last_name\": \"Rahik\", \"username\": \"noorrahik12\", \"email\": \"noorrahik@gmail.com\" ,\"password\": \"rahik123456\"}" http://localhost:5000/api/register"
 
 #Login
 # curl -g -X POST -H "Content-Type: application/json" -d "{\"username\":\"sajidmahmud69\",\"password\":\"mallu\"}" "http://localhost:5000/api/login"
