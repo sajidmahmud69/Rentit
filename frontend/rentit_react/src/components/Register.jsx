@@ -12,7 +12,7 @@ class Register extends Component {
     register = (e) => {
         e.preventDefault();
         axios
-            .post("/api/register", {
+            .post("http://localhost:5000/api/register", {
                 first_name: document.getElementById("first_name").value,
                 last_name:  document.getElementById("last_name").value,
                 username:   document.getElementById("username").value,
