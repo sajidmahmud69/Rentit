@@ -253,7 +253,7 @@ def add_lsiting():
         image = request.json["image"]
         address = request.json["address"]
         price = request.json["price"]
-        user_id = request.json["user_id"]
+        user_id = get_jwt_identity()
         blah= addListing(user_id,title,description,image,address,price)
         return jsonify ({"success": "true"},{"Data": blah})
     except Exception as e:
