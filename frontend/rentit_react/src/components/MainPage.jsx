@@ -7,7 +7,10 @@ class MainPage extends React.Component{
 
     constructor(){
         super()
-        this.state = {listings: []}
+        this.state = {
+            listings: [],
+            currentUser: "",
+        }
         
     }
 
@@ -15,6 +18,16 @@ class MainPage extends React.Component{
         Axios.get("http://localhost:5000/api/listings").then (res => {
             this.setState({listings: res.data})
         });
+
+        setTimeout (() => {
+            Axios.get ("http://localhost:5000/api/getcurrentuser", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem ("token")}`
+                }
+            }).then (res => {
+                this.setState ({ currentUser: res.data})
+            })
+        }, 500)
     }
 
     render() {
@@ -38,8 +51,9 @@ class MainPage extends React.Component{
                                 Image={item.image}
                                 Address={item.address}
                                 Price={item.price}
-                                key={index}
-                                />
+                                isOwner = {this.state.currentUser.user_id === item.user_id.user_id}
+                                
+                            />
                         );
                     })}
                 </div>
