@@ -1,50 +1,291 @@
-from flask import Flask, jsonify, render_template, request, url_for, redirect, session
+from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
+import re
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, \
+     jwt_refresh_token_required, create_refresh_token, get_raw_jwt
 
 app = Flask (__name__)
 app.secret_key = "THISISSECRET"
+# Configure DB
+app.config['SQLALCHEMY_DATABASE_URI']='mysql://root:123456@localhost/rentit'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
+app.config["JWT_SECRET_KEY"]="nevergonnagiveyouup"
+app.config["JWT_BLACKLIST_ENABLED"] = True
+app.config["JWT_BLACKLIST_TOKEN_CHECKS"] =["access","refresh"]
+CORS(app)
+jwt=JWTManager(app)
 
+db= SQLAlchemy(app)
 
-@app.route ('/')
-def home ():
-    return 'Hello World'
+class Users(db.Model):
+    user_id     =db.Column(db.Integer,    primary_key=True,autoincrement=True)
+    first_name  =db.Column(db.String(80), nullable=False)
+    last_name   =db.Column(db.String(80), nullable=False)
+    username    =db.Column(db.String(80), unique=True,nullable=False)
+    email       =db.Column(db.String(80), unique=True,nullable=False)
+    password    =db.Column(db.String(80), nullable=False)
 
-@app.route ('/login', methods = ["GET", "POST"])
-def login():
-    if request.method == 'POST':
-        user = request.form ['name']
-        if user == "":
-            return redirect (url_for ('login'))
-        else:
-            session ["USER"] = user     
-        return redirect (url_for ("user"))
+    def __init__(self,first_name,last_name,username,email,password):
+        self.first_name   =first_name
+        self.last_name    =last_name
+        self.username     =username
+        self.email        =email
+        self.password     =password
+
+#methods for Users
+
+def getUsers():
+    users = Users.query.all()
+    return [{"user_id":i.user_id,"first_name":i.first_name,"last_name":i.last_name,"username":i.username,"email":i.email,"password":i.password} for i in users]
+
+def getUser(user_id):
+    users = Users.query.all()
+    user = list(filter(lambda x: x.user_id ==user_id,users))[0]
+    return {"user_id":user.user_id,"first_name":user.first_name,"last_name":user.last_name,"username":user.username,"email":user.email,"password":user.password}
+
+def addUser(first_name,last_name,username,email,password):
+    if (first_name and last_name and username and email and password):
+        try:
+            user = Users(first_name,last_name,username,email,password)
+            db.session.add(user)
+            db.session.commit()
+            return True
+        except Exception as e:
+                print (e)
+                return False
     else:
-        if "USER" in session:
-            return redirect (url_for ('user'))
-        return render_template ("login.html")
+        return False
+
+def removeUser(uid):
+    uid = request.json["user_id"]
+    if (uid):
+        try:
+            user = Users.query.get(uid)
+            db.session.delete(user)
+            db.session.commit()
+            return True
+        except Exception as e:
+            print (e)
+            return False
+    else:
+        return False
 
 
-@app.route ('/user')    
-def user ():
-
-    if "USER" in session :
-        name = session ["USER"]
-        return f"<h1>You are logged in {name}</h1>" 
-
-    # else:
-    #     return redirect (url_for("login"))
-
-@app.route ('/logout')
-def logout ():
-    session.pop ("USER", None)
-    return redirect (url_for ('login'))
-    
+class Listing(db.Model):
+    list_id     = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey("users.user_id"),nullable=False)
+    title       = db.Column(db.String(80),nullable=False)
+    description = db.Column(db.String(256))
+    image       = db.Column(db.String(2048))
+    address     = db.Column(db.String(100),nullable=False)
+    price       = db.Column(db.Integer,nullable=False)    
 
 
+    def __init__(self,user_id,title,description,image,address,price):
+        self.user_id    =user_id
+        self.title      =title
+        self.description=description
+        self.image      =image
+        self.address    =address
+        self.price      =price
+
+#Methods for listing
+
+def getListings():
+    listings = Listing.query.all()
+    return [{"list_id":i.list_id,"user_id":getUser(i.user_id),"title": i.title,"description":i.description,"image":i.image,"address":i.address,"price":i.price}for i in listings]
+
+def getUserListings(user_id):
+    listings = Listing.query.all()
+    return [{"list_id":item.list_id,"user_id":item.user_id,"title": item.title,"description":item.description,"image":item.image,"address":item.address,"price":item.price}for item in filter(lambda i: i.user_id==user_id,listings)]
+
+
+def addListing(user_id,title,description,image,address,price):
+        user_id=int(user_id)
+        image=str(image)
+        try:
+            users= getUsers()
+            user=list(filter(lambda i: i["user_id"]== user_id,users))[0]
+            listing=Listing(user["user_id"],title,description,image,address,price)
+            db.session.add(listing)
+            db.session.commit()
+            # print(users)
+            return True
+        except Exception as e:
+            print (e)
+            return "Bhitorer Error"
+
+def delListing(list_id):
+    try:
+        listing = Listing.query.get(list_id)
+        db.session.delete(listing)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return False
+
+#Token table
+class InvalidToken(db.Model):
+    __tablename__="invalid_tokens"
+    token_id = db.Column(db.Integer,primary_key=True)
+    jti = db.Column(db.String(255))
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def is_invalid(cls,jti):
+        q= cls.query.filter_by(jti=jti).first()
+        return bool(q)
+
+@jwt.token_in_blacklist_loader
+def check_if_blacklisted_token(decrypted):
+    jti = decrypted["jti"]
+    return InvalidToken.is_invalid(jti)
+
+#Routes for the backend
+
+@app.route('/')
+def index():
+    return "Hello, world!"
+
+@app.route("/api/register",methods=["POST"])
+def register():
+    try:
+        first_name  = request.json["first_name"]
+        last_name   = request.json["last_name"]
+        username    = request.json["username"]
+        email       = request.json["email"]
+        email       = email.lower()
+        password    = request.json["password"]
+        #Check to see if user already exists
+        users = getUsers()
+
+        if (len(list(filter(lambda x: x["email"]==email,users )))==1):
+            return jsonify({"error": "Use different email"})
+        #Email Validation cehck
+        if not re.match(r"[\w\._]{5,}@\w{3,}.\w{2,4}", email):
+            return jsonify ({"error":"Invalid Email"})
+
+        if (len(list(filter(lambda x: x["username"]==username,users )))==1):
+            return jsonify({"error": "Use different username"})
+
+        addUser(first_name,last_name,username,email,password)
+        return jsonify({"success": True})
+    except:
+        return jsonify({"error": "Invalid form"})
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    try:
+        username = request.json["username"]
+        password = request.json["password"]
+        if (username and password):
+            user = list(filter(lambda x: x["username"]==username and x["password"]==password,getUsers() ))
+            
+            #Check if user exists
+            if len(user)==1:
+                token = create_access_token(identity=user[0]["user_id"])
+                refresh_token = create_refresh_token(identity=user[0]["user_id"])
+                return jsonify({"token": token,"refreshToken": refresh_token})
+
+            else: return jsonify({"error":"Incorrect Username or Password"})       
+        else:
+            return jsonify({"error":"Imposter"})
+    except Exception as e:
+        print(e)
+        return jsonify({"error":"Invalid Form"})
+
+
+@app.route("/api/checkiftokenexpire",methods=["POST"])
+@jwt_required
+def check_if_token_expire():
+    print(get_jwt_identity())
+    return jsonify({"success": True})
+
+@app.route("/api/refreshtoken", methods=["POST"])
+@jwt_refresh_token_required
+def refresh():
+    identity = get_jwt_identity()
+    token = create_access_token(identity=identity)
+    return jsonify({"token": token})
+
+
+@app.route("/api/logout/access", methods=["POST"])
+@jwt_required
+def access_logout():
+    jti = get_raw_jwt()["jti"]
+    try:
+        invalid_token = InvalidToken(jti=jti)
+        invalid_token.save()
+        return jsonify({"success": True})
+    except Exception as e:
+        print(e)
+        return {"error": e}
+
+
+@app.route("/api/logout/refresh", methods=["POST"])
+@jwt_required
+def refresh_logout():
+    jti = get_raw_jwt()["jti"]
+    try:
+        invalid_token = InvalidToken(jti=jti)
+        invalid_token.save()
+        return jsonify({"success": True})
+    except Exception as e:
+        print(e)
+        return {"error": e}
 
 
 
+@app.route("/api/listings")
+def get_listings():
+    return jsonify(getListings())
 
+@app.route("/api/addlisting", methods=["POST"])
+@jwt_required
+def add_lsiting():
+    try:
+        title = request.json["title"]
+        description = request.json["description"]
+        image = request.json["image"]
+        address = request.json["address"]
+        price = request.json["price"]
+        user_id = request.json["user_id"]
+        blah= addListing(user_id,title,description,image,address,price)
+        return jsonify ({"success": "true"},{"Data": blah})
+    except Exception as e:
+        print (e)
+        return jsonify({"error":"Invalid Form"})
+
+
+@app.route("/api/deletelisting",methods=["DELETE"])
+@jwt_required
+def delete_listing():
+    try:
+        list_id = request.json["list_id"]
+        delListing(list_id)
+        return jsonify({"Success":"true"})
+    except:
+        return jsonify({"error": "Invalid form"})
 
 
 if __name__ == '__main__':
     app.run (debug = True, host = 'localhost', port = 5000)
+
+
+#Register
+# curl -g -X POST -H "Content-Type: application/json" -d "{\"first_name\": \"Sajid\", \"last_name\": \"Mahmud\",\"username\":\"sajidmahmud69\",\"email\":\"sajidmahmud36@yahoo.com\",\"password\":\"mallu\"}" "http://localhost:5000/api/register"
+
+#Login
+# curl -g -X POST -H "Content-Type: application/json" -d "{\"username\":\"sajidmahmud69\",\"password\":\"mallu\"}" "http://localhost:5000/api/login"
+
+#Adding a listing
+# curl -g -X POST -H "Content-Type: application/json" -d "{\"title\": \"My Old House\", \"description\": \"beshi boro basha noy\", \"image\": \"http://google.com\",\"address\":\"16420 86th Road\",\"price\":\"2500\",\"user_id\":\"1\"}" "http://localhost:5000/api/addlisting"
+
+# Get Listing
+# curl "http://localhost:5000/api/listings" 
+
+# curl -g -X POST -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MDc5MzY1MDMsIm5iZiI6MTYwNzkzNjUwMywianRpIjoiMWY0ZDExZWQtZDI0OS00NWY2LWFhZGQtNWVjZDhkZjhiMjcwIiwiZXhwIjoxNjA3OTM3NDAzLCJpZGVudGl0eSI6MSwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIn0.ad_UCJy8vXxf9vW1Hi9OX9HCrqHS5BWnlsMfnxNR7ZE" -H "Content-Type: application/json" -d "{\"user_id\":\"1\",\"title\":\"Jonglee Basha\",\"description\": \"Basha daroon kintu dorja khola thake\",\"image\":\"http://www.yourorlandorealty.com/wp-content/uploads/2012/09/House_Front-300x223.jpg\",\"address\":\"16420 86th road\",\"price\":\"1400\"}" "http://localhost:5000/api/addlisting"
