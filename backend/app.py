@@ -59,18 +59,16 @@ def addUser(first_name,last_name,username,email,password):
         return False
 
 def removeUser(uid):
-    uid = request.json["user_id"]
-    if (uid):
-        try:
-            user = Users.query.get(uid)
-            db.session.delete(user)
-            db.session.commit()
-            return True
-        except Exception as e:
-            print (e)
-            return False
-    else:
+
+    try:
+        user = Users.query.get(uid)
+        db.session.delete(user)
+        db.session.commit()
+        return True
+    except Exception as e:
+        print (e)
         return False
+
 
 
 class Listing(db.Model):
@@ -267,11 +265,10 @@ def add_lsiting():
         return jsonify({"error":"Invalid Form"})
 
 
-@app.route("/api/deletelisting",methods=["DELETE"])
+@app.route("/api/deletelisting/<list_id>",methods=["DELETE"])
 @jwt_required
-def delete_listing():
+def delete_listing(list_id):
     try:
-        list_id = request.json["list_id"]
         delListing(list_id)
         return jsonify({"Success":"true"})
     except:
@@ -283,6 +280,46 @@ def delete_listing():
 def get_current_user():
     user_id = get_jwt_identity()
     return jsonify (getUser (user_id))
+
+
+
+
+@app.route ("/api/changepassword", methods =["POST"])
+@jwt_required
+def change_password ():
+    try:
+        user = Users.query.get (get_jwt_identity())
+        if not (request.json["password"] and request.json["npassword"]):
+            return jsonify ({"error": "Invalid Form"})
+        if not user.password == request.json["password"]:
+            return jsonify ({"error": "Wrong Password"})
+
+        user.password = request.json["npassword"]
+        db.session.add (user)
+        db.session.commit ()
+        return jsonify ({"Success": True, "Password": "CHANGED"})
+    except Exception as e:
+        print (e)
+        return jsonify ({"error": "Invalid form"})
+
+
+
+@app.route ("/api/deleteaccount", methods = ["DELETE"])
+@jwt_required
+def delete_account():
+    try:
+        user = Users.query.get (get_jwt_identity())
+        listings = Listing.query.all()
+        for listing in listings:
+            if listing.user_id == user.user_id:
+                delListing (listing.list_id)
+        removeUser (user.user_id)
+        return jsonify ({"Succes": True, "Account": "REMOVED"})
+    except Exception as e:
+        return jsonify ({"error": "Failed"})
+
+
+
 
 
 if __name__ == '__main__':
