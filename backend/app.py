@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import re
@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']= False
 app.config["JWT_SECRET_KEY"]="nevergonnagiveyouup"
 app.config["JWT_BLACKLIST_ENABLED"] = True
 app.config["JWT_BLACKLIST_TOKEN_CHECKS"] =["access","refresh"]
+
 CORS(app)
 jwt=JWTManager(app)
 
@@ -145,6 +146,8 @@ def check_if_blacklisted_token(decrypted):
     jti = decrypted["jti"]
     return InvalidToken.is_invalid(jti)
 
+
+
 #Routes for the backend
 
 @app.route('/')
@@ -189,6 +192,7 @@ def login():
             if len(user)==1:
                 token = create_access_token(identity=user[0]["user_id"])
                 refresh_token = create_refresh_token(identity=user[0]["user_id"])
+                                
                 return jsonify({"token": token,"refreshToken": refresh_token})
 
             else: return jsonify({"error":"Incorrect Username or Password"})       
@@ -256,6 +260,7 @@ def add_lsiting():
         # user_id = request.json["user_id"]
         user_id = get_jwt_identity()
         addListing(user_id,title,description,image,address,price)
+            
         return jsonify ({"success": "true"})
     except Exception as e:
         print (e)
@@ -271,6 +276,13 @@ def delete_listing():
         return jsonify({"Success":"true"})
     except:
         return jsonify({"error": "Invalid form"})
+
+
+@app.route ("/api/getcurrentuser")
+@jwt_required
+def get_current_user():
+    user_id = get_jwt_identity()
+    return jsonify (getUser (user_id))
 
 
 if __name__ == '__main__':
