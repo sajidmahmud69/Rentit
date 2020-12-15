@@ -22,5 +22,4 @@ An utility application where landlord can post advertisements about renting thei
 15. cd frontend\rentit_react
 16. npm install ( this will install all react and node modules needed for the project to run)
 17. Once the setup is ready use the command npm start
-18 This will open up a window in your local browser with the web app running
-19. 
+18 This will open up a window in your local browser with the web app running.
