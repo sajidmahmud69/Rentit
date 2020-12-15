@@ -7,7 +7,8 @@ import {BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import MainPage from "./MainPage";
 import { check } from "../login";
 import Logout from "./Logout";
-
+import UserSettings from './UserSettings'
+import NotFound from "./NotFound";
 
 function App() {
 
@@ -19,12 +20,16 @@ function App() {
         <React.Fragment>
             <Navbar />
             <Router>
-                <Route path="/" exact>
-                    {login ? <MainPage/>: <Home/> }
-                </Route>
-                <Route exact path="/login"      component= {Login} />
-                <Route exact path="/register"   component= {Register} />
-                <Route exact path="/logout"     component= {Logout} />
+                <Switch>
+                    <Route path="/" exact>
+                        {login ? <MainPage/>: <Home/> }
+                    </Route>
+                    <Route exact path="/login"      component= {Login} />
+                    <Route exact path="/register"   component= {Register} />
+                    <Route exact path="/logout"     component= {Logout} />
+                    <Route path = "/settings" component = {UserSettings} />
+                    <Route component = {NotFound} />
+                </Switch>
             </Router>
         </React.Fragment>
     );

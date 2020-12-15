@@ -1,56 +1,52 @@
-import React from 'react';
-import Alert from "./Alert";
-import  Axios from "axios";
+import React, { Component } from 'react'
+import Alert from './Alert'
+import Axios from 'axios'
 
-class UserSettings extends React.Component {
 
-    constructor(){
-        super()
-        this.state= {
+
+export class UserSettings extends Component {
+    constructor (){
+        super ()
+        this.state = {
             currentSetting: "main",
             err: ""
-        } 
-    }
-
-    componentDidMount() {
-        if (!localStorage.getItem("token")) {
-            window.location = "/login"
         }
     }
 
-    changePassword =(e) => {
+    changePassword = e => {
         e.preventDefault();
-        Axios.post("http://localhost:5000/api/changepassword", {
-            password: document.getElementById("password").value,
-            npassword:document.getElementById("npassword").value
+        Axios.post ("http://localhost:5000/api/changepassword", {
+            password: document.getElementById ("password").value,
+            npassword: document.getElementById ("npassword").value,
         }, {
             headers: {
-                Authorization: "Bearer " + localStorage.getItem("token")
+                Authorization: "Bearer " + localStorage.getItem ("token")
             }
-        })
-        .then (res => {
-            if (res.data.error) {
-                this.setState(
-                    {err: res.data.error}
-                )
-            } else {
-                alert("Password changed! Logging you out....")
+        }).then (res => {
+            if (res.data.error){
+                this.setState ({
+                    err: res.data.error
+                })
+            }else {
+                alert ("Password changed! Logging you out...")
                 window.location = "/logout"
             }
         })
     }
 
-    deleteAccount = (e) => {
+    deleteAccount = e => {
         e.preventDefault();
-        let x = window.confirm("Are you sure want to delete your account? THIS CANNOT BE UNDONE. ALL OF YOUR POSTS WILL BE DELETED")
-        if (x) {
-            Axios.delete("http://localhost:5000/api/deleteaccount", {headers: {Authorization: "Bearer "+ localStorage.getItem("token")}})
-            .then (res => {
-                if  (res.data.error) {
-                    alert("An error occurred: " + res.data.error)
+        let x = window.confirm ("Are you sure you want to delete your account? ALL OF YOUR LISTINGS WILL BE DELETED. THIS ACTION CANNOT BE UNDONE")
+        if (x){
+            Axios.delete ("http://localhost:5000/api/deleteaccount", {
+                headers: {
+                    Authorization : "Bearer " + localStorage.getItem ("token")
                 }
-                else {
-                    alert("Your account has been deleted. We're sad to see you go :(. Now, anyone can sign up with your username. Logging you out....")
+            }).then (res => {
+                if (res.data.error){
+                    alert ("An error occured: " + res.data.error)
+                }else{
+                    alert ("Your account has been deleted")
                     window.location = "/logout"
                 }
             })
@@ -58,7 +54,8 @@ class UserSettings extends React.Component {
     }
 
     render() {
-        return (<div className="w3-container" style={{margin: "3rem"}}>
+        return (
+            <div className="w3-container" style={{margin: "3rem"}}>
             <div className="w3-card w3-border w3-round-large">
                 <header className="w3-container w3-xlarge w3-blue"
                         style={{padding: "0.5rem", paddingLeft: "3rem"}}>Settings
@@ -98,7 +95,7 @@ class UserSettings extends React.Component {
                             </p>
                         </form>
                     </div>}
-                    {this.state.currentSetting === "del" && <div style={{margin: "1rem"}}>
+                    {this.state.currentSetting == "del" && <div style={{margin: "1rem"}}>
                         <h1 className="w3-xxlarge w3-text-red">Delete account</h1>
                         <hr className="w3-border-top w3-border-black"/>
                         <button className="w3-button w3-blue"
@@ -111,8 +108,9 @@ class UserSettings extends React.Component {
                     </div>}
                 </div>
             </div>
-        </div>)
+        </div>
+        )
     }
 }
 
-export default UserSettings;
+export default UserSettings

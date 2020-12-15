@@ -1,4 +1,18 @@
 import React from "react";
+import Axios from 'axios'
+
+function deleteListing(lid){
+    Axios.delete ("http://localhost:5000/api/deletelisting/" + lid, {
+        headers: {
+            Authorization: "Bearer " + localStorage.getItem ("token")
+        }
+    }).then (res => {
+        console.log (res.data)
+        window.location.reload()
+    })
+}
+
+
 
 function ListingItem(props){
     return (
@@ -12,13 +26,17 @@ function ListingItem(props){
                 <h2 className = "w2-opacity w3-xxlarge">
                     <span className = "w3-opacity">{props.Title}</span>
                     {props.isOwner && 
-                        <button className="w3-right w3-button w3-red w3-large w3-hover-pale-red w3-round-large"> 
+                        <button 
+                            className="w3-right w3-button w3-red w3-large w3-hover-pale-red w3-round-large"
+                            onClick = {() => deleteListing(props.id)}
+                        >
+                             
                             Delete
                         </button>
                     }
                 </h2>
                 <div>{props.Description}</div>
-                <img src = {props.Image}/>
+                <img src = {props.Image} style = {{width: "1100px"}}/>
                 <div>{props.Address}</div>
                 <div>{props.Price}</div>
             </div>

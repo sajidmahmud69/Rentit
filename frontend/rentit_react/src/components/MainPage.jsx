@@ -16,7 +16,7 @@ class MainPage extends React.Component{
 
     componentDidMount(){
         Axios.get("http://localhost:5000/api/listings").then (res => {
-            this.setState({listings: res.data})
+            this.setState({listings: res.data.reverse()})
         });
 
         setTimeout (() => {
@@ -52,6 +52,7 @@ class MainPage extends React.Component{
                                 Address={item.address}
                                 Price={item.price}
                                 isOwner = {this.state.currentUser.user_id === item.user_id.user_id}
+                                id = {item.list_id}
                                 
                             />
                         );
