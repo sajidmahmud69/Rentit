@@ -1,3 +1,9 @@
+### Rentit
+
+An utility application where landlord can post advertisements about renting their house to a tenant. There will be two groups of people who can benefit from this application. One group of people are the landlord/landlady and the other group will be the tenants. Landlord/landlady can post advertisements about vacancy in their house to rent to a tenant. The tenant can view those advertisements in their desired neighborhood and make an appointment with the landlord/landlady to view the house. 
+
+
+
 ### To run this application
 1. open a terminal and run the command git clone https://github.com/sajidmahmud69/Rentit.git
 2. Once the git repository is ready use the terminal and write the command cd Rentit.
@@ -17,3 +23,4 @@
 16. npm install ( this will install all react and node modules needed for the project to run)
 17. Once the setup is ready use the command npm start
 18 This will open up a window in your local browser with the web app running
+19. 
