@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Axios from 'axios'
 import Comments from './Comments'
 import ViewComments from "./ViewComments";
+import Appointment from './Appointment'
 
 function deleteListing(lid){
     Axios.delete ("http://localhost:5000/api/deletelisting/" + lid, {
@@ -69,7 +70,10 @@ function ListingItem(props){
                     }}>Comment</button>
                     <Comments list_id = {props.id}/>
 
-                    <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Make an appointment</button>
+                    <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}onClick = {() => {
+                        document.getElementById ("appointment").style.display = "block"
+                    }}>Make an appointment</button>
+                    <Appointment />
                 </footer>
             </div>
                 {console.log (comments.comment)}
