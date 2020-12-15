@@ -1,0 +1,32 @@
+import React from 'react'
+
+function Comments() {
+    return (
+        <div className = "w3-modal w3-animate-opacity" id = "comments">
+            <div className = "w3-modal-content w3-card">
+                <header className = "w3-container w3-blue">
+                    <span className = "w3-button w3-display-topright w3-hover-none w3-hover-text-white" onClick = {() => {
+                        document.getElementById("comments").style.display = "none"
+                    }}>X</span>
+                    <h2>Write a comment</h2>
+                </header>
+                <form className = "w3-container" >
+                    <div className = "w3-section">
+                        <label htmlFor = "name">Name</label>
+                        <input type = "text" id = "name" className = "w3-input w3-border w3-margin-bottom" />
+
+
+                        <label htmlFor = "comment">Comment</label>
+                        <textarea rows={4} cols={76}></textarea>
+
+
+                        <button type = "submit" className = "w3-button w3-blue">Submit</button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    )
+}
+
+export default Comments

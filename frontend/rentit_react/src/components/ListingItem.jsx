@@ -1,5 +1,6 @@
 import React from "react";
 import Axios from 'axios'
+import Comments from "./Comments"
 
 function deleteListing(lid){
     Axios.delete ("http://localhost:5000/api/deletelisting/" + lid, {
@@ -35,15 +36,18 @@ function ListingItem(props){
                         </button>
                     }
                 </h2>
-                <div>{props.Description}</div>
+                <div><h3>Description: {props.Description}</h3></div>
                 <img src = {props.Image} style = {{width: "1100px"}}/>
-                <div>{props.Address}</div>
-                <div>{props.Price}</div>
+                <div><h3>Address: {props.Address}</h3></div>
+                <div><h3>Rent: ${props.Price}</h3></div>
             </div>
             <footer className = "w3-container w3-center w3-large">
                 <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>More Info </button>
                 <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Like</button>
-                <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Comment</button>
+                <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}onClick = {() => {
+                        document.getElementById ("comments").style.display = "block"
+                    }}>Comment</button>
+                    <Comments />
                 <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Make an appointment</button>
             </footer>
 
