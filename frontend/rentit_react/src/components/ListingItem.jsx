@@ -55,7 +55,7 @@ function ListingItem(props){
                     <button 
                         className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}} onClick = {() => {
                             document.getElementById("view-comments").style.display = "block"
-                        }}>   More Info 
+                        }}>   View Comments 
                     </button>
                         {comments.map (item => {
                             return (
