@@ -1,5 +1,5 @@
 ### To run this application
-1. open a terminal and run the command git clone "https://github.com/sajidmahmud69/Rentit.git"
+1. open a terminal and run the command git clone https://github.com/sajidmahmud69/Rentit.git
 2. Once the git repository is ready use the terminal and write the command cd Rentit.
 3. Create a virtual environment.
 4. Write the command virtualenv rentit-venv
