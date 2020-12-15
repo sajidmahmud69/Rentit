@@ -45,7 +45,7 @@ function ListingItem(props){
                         </button>
                     }
                 </h2>
-                <div>{props.Description}</div>
+                <div><h3>Description: {props.Description}</h3></div>
                 <img src = {props.Image} style = {{width: "1100px"}}/>
                 <div>{props.Address}</div>
                 <div>${props.Price}</div>

@@ -70,7 +70,6 @@ def removeUser(uid):
         return False
 
 
-
 class Listing(db.Model):
     list_id     = db.Column(db.Integer, primary_key=True,autoincrement=True)
     user_id     = db.Column(db.Integer, db.ForeignKey("users.user_id"),nullable=False)
