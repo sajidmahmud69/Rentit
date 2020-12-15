@@ -395,7 +395,7 @@ def add_comment ():
         comment = request.json ["comment"]
         addComment (list_id, user_id, comment)
 
-        return jsonify ({"Success": True})
+        return jsonify ({"success": True})
     except Exception as e:
         print (e)
         return jsonify ({"error": "Invalid Submission"})

@@ -48,8 +48,8 @@ function ListingItem(props){
                 </h2>
                 <div><h3>Description: {props.Description}</h3></div>
                 <img src = {props.Image} style = {{width: "1100px"}}/>
-                <div>{props.Address}</div>
-                <div>${props.Price}</div>
+                <div>Address: {props.Address}</div>
+                <div>Price: ${props.Price}</div>
             </div>
             <div className = "w3-modal-content w3-card">
                 <footer className = "w3-container w3-center w3-large">
@@ -58,13 +58,11 @@ function ListingItem(props){
                             document.getElementById("view-comments").style.display = "block"
                         }}>   View Comments 
                     </button>
-                        {comments.map (item => {
+                    {comments.map (item => {
                             return (
                                 <ViewComments comment = {item.comment} />
                             )
                         })}
-
-
                     <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}onClick = {() => {
                         document.getElementById ("comments").style.display = "block"
                     }}>Comment</button>

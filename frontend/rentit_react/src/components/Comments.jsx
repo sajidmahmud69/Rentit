@@ -13,7 +13,7 @@ function Comments(props) {
             }
         }).then (res => {
             if (res.data.success){
-                window.location.reload ()
+                window.location.reload()
             }
         })
     }
