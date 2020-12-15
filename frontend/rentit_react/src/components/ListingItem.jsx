@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Axios from 'axios'
+import Comments from './Comments'
+import ViewComments from "./ViewComments";
 
 function deleteListing(lid){
     Axios.delete ("http://localhost:5000/api/deletelisting/" + lid, {
@@ -14,7 +16,16 @@ function deleteListing(lid){
 
 
 
+
+
 function ListingItem(props){
+    const [comments, setComments] = useState ([])
+
+    useEffect (() => {
+        Axios.get ("http://localhost:5000/api/comments")
+        .then (res => setComments (res.data))
+    }, [])
+
     return (
         <div 
             className = "w3-card w3-border w3-border-gray w3-round-large"
@@ -29,8 +40,7 @@ function ListingItem(props){
                         <button 
                             className="w3-right w3-button w3-red w3-large w3-hover-pale-red w3-round-large"
                             onClick = {() => deleteListing(props.id)}
-                        >
-                             
+                        >                            
                             Delete
                         </button>
                     }
@@ -38,17 +48,34 @@ function ListingItem(props){
                 <div>{props.Description}</div>
                 <img src = {props.Image} style = {{width: "1100px"}}/>
                 <div>{props.Address}</div>
-                <div>{props.Price}</div>
+                <div>${props.Price}</div>
             </div>
-            <footer className = "w3-container w3-center w3-large">
-                <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>More Info </button>
-                <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Like</button>
-                <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Comment</button>
-                <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Make an appointment</button>
-            </footer>
+            <div className = "w3-modal-content w3-card">
+                <footer className = "w3-container w3-center w3-large">
+                    <button 
+                        className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}} onClick = {() => {
+                            document.getElementById("view-comments").style.display = "block"
+                        }}>   More Info 
+                    </button>
+                        {comments.map (item => {
+                            return (
+                                <ViewComments comment = {item.comment} />
+                            )
+                        })}
 
+
+                    <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}onClick = {() => {
+                        document.getElementById ("comments").style.display = "block"
+                    }}>Comment</button>
+                    <Comments list_id = {props.id}/>
+
+                    <button className = "w3-button" style = {{marginRight: "2rem" ,float:"left"}}>Make an appointment</button>
+                </footer>
+            </div>
+                {console.log (comments.comment)}
         </div>
     );
 }
 
 export default ListingItem;
+

@@ -95,6 +95,14 @@ def getListings():
     listings = Listing.query.all()
     return [{"list_id":i.list_id,"user_id":getUser(i.user_id),"title": i.title,"description":i.description,"image":i.image,"address":i.address,"price":i.price}for i in listings]
 
+
+def getUniqueListing (lid):
+    listings = Listing.query.all()
+    listing = list(filter(lambda x: x.list_id ==lid,listings))[0]
+    return {"list_id": listing.list_id, "user_id":listing.user_id, "title": listing.title, "description": listing.description, "image": listing.image, "address": listing.address, "price": listing.price}
+
+
+
 def getUserListings(user_id):
     listings = Listing.query.all()
     return [{"list_id":item.list_id,"user_id":item.user_id,"title": item.title,"description":item.description,"image":item.image,"address":item.address,"price":item.price}for item in filter(lambda i: i.user_id==user_id,listings)]
@@ -143,6 +151,58 @@ class InvalidToken(db.Model):
 def check_if_blacklisted_token(decrypted):
     jti = decrypted["jti"]
     return InvalidToken.is_invalid(jti)
+
+
+
+class Comment (db.Model):
+    comment_id = db.Column (db.Integer, primary_key = True, autoincrement = True)
+    list_id = db.Column (db.Integer, db.ForeignKey("listing.list_id"), nullable = False)
+    user_id = db.Column (db.Integer, db.ForeignKey("users.user_id"), nullable = False)
+    comment = db.Column (db.String (2048), nullable = False)
+
+    def __init__ (self, list_id, user_id, comment):
+        self.list_id = list_id
+        self.user_id = user_id
+        self.comment = comment
+
+
+
+def getComments():
+    comments = Comment.query.all ()
+    return [{"comment_id": i.comment_id, "list_id": getUniqueListing (i.list_id), "user_id": getUser (i.user_id), "comment": i.comment} for i in comments]
+
+
+def addComment (list_id, user_id, comment):
+    list_id = int (list_id)
+    user_id = int (user_id)
+    
+    try:
+        listings = getListings ()
+        listing = list(filter(lambda i: i["list_id"]== list_id,listings))[0]
+        users= getUsers()
+        user=list(filter(lambda i: i["user_id"]== user_id,users))[0] 
+
+        comment = Comment (listing["list_id"], user ["user_id"], comment)
+        db.session.add (comment)
+        db.session.commit ()
+
+        return True
+    except Exception as e:
+        # print (e)
+        # return {"Error": "Invalid Submission"}
+
+        listings = getListings ()
+        listing = list(filter(lambda i: i["list_id"]== list_id,listings))[0]
+        users= getUsers()
+        user=list(filter(lambda i: i["user_id"]== user_id,users))[0] 
+
+        return ({"listing": listing, "user": user})
+
+
+
+
+
+
 
 
 
@@ -200,6 +260,10 @@ def login():
         print(e)
         return jsonify({"error":"Invalid Form"})
 
+
+@app.route ("/api/users", methods = ["GET"])
+def test_user_function ():
+    return jsonify (getUsers())
 
 @app.route("/api/checkiftokenexpire",methods=["POST"])
 @jwt_required
@@ -318,6 +382,26 @@ def delete_account():
     except Exception as e:
         return jsonify ({"error": "Failed"})
 
+
+@app.route ("/api/comments", methods =["GET"])
+def get_comments ():
+    return jsonify (getComments())
+
+@app.route ("/api/addcomment", methods = ["POST"])
+@jwt_required
+def add_comment ():
+    try:
+        list_id = request.json ["list_id"]
+        user_id = get_jwt_identity()
+        comment = request.json ["comment"]
+        addComment (list_id, user_id, comment)
+
+        return jsonify ({"Success": True})
+    except Exception as e:
+        print (e)
+        return jsonify ({"error": "Invalid Submission"})
+
+      
 
 
 

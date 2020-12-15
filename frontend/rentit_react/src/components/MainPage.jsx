@@ -2,6 +2,7 @@ import React from "react";
 import ListingItem from "./ListingItem";
 import Axios from "axios";
 import AddListing from './AddListing'
+import Comments from './Comments'
 
 class MainPage extends React.Component{
 
@@ -30,6 +31,7 @@ class MainPage extends React.Component{
         }, 500)
     }
 
+    
     render() {
         return (
             <React.Fragment>
@@ -53,10 +55,12 @@ class MainPage extends React.Component{
                                 Price={item.price}
                                 isOwner = {this.state.currentUser.user_id === item.user_id.user_id}
                                 id = {item.list_id}
+                                moreInfo = {this.handleMoreInfo}
                                 
                             />
                         );
                     })}
+                
                 </div>
             </React.Fragment>
         );
