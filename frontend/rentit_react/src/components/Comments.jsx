@@ -1,6 +1,7 @@
 import React from 'react'
 
 function Comments() {
+
     return (
         <div className = "w3-modal w3-animate-opacity" id = "comments">
             <div className = "w3-modal-content w3-card">
